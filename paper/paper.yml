@@ -1,5 +1,5 @@
 title: 'ExaPF.jl: A Power Flow Solver for GPUs'
-tags:
+keywords:
   - Julia
   - CUDA
   - power flow

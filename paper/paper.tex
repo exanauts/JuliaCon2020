@@ -53,7 +53,7 @@ flexible API for models and formulations outside of the domain of OPF.
 
 To make our implementation portable to CPU and GPU architectures we leverage
 two abstractions: arrays and kernels. Both of these abstractions are
-supported through the packages \lstinline{CUDA.jl} \cite{besard2018juliagpu,besard2019prototyping,KernelAbstractions.jl}
+supported through the packages \lstinline{CUDA.jl} \cite{besard2018juliagpu,besard2019prototyping} and \lstinline{KernelAbstractions.jl}
 
 \subsection{AutoDiff}
 
@@ -85,6 +85,7 @@ buses.
 \newcommand{\bigo}[1]{\mathcal{O}\left( #1 \right)}
 
 \begin{figure}
+    \centering
     \includegraphics[width=0.45\textwidth]{figures/compression.png}
     \caption{Jacobian coloring}
     \label{fig:coloring}
@@ -103,13 +104,15 @@ Given the sparsity pattern, the forward model is applied through the package
 colors $c$ we can build our dual type \lstinline{t1s} with \lstinline{c} directions:
 
 \begin{lstlisting}[language = Julia]
-t1s{N} = ForwardDiff.Dual{Nothing,Float64, N} where N}
+t1s{N} = 
+ForwardDiff.Dual{Nothing,Float64, N} where N}
 \end{lstlisting}
 
 Note that a second-order type \lstinline{t2s} can be created naturally by applying the same logic to \lstinline{t1s}:
 
 \begin{lstlisting}[language = Julia]
-t2s{M,N} =  ForwardDiff.Dual{Nothing,t1s{N}, M} where M, N}
+t2s{M,N} =  
+ForwardDiff.Dual{Nothing,t1s{N}, M} where M, N}
 \end{lstlisting}
 
 Finally, this dual type can be ported to both vector types \lstinline{Vector} and \lstinline{CuVector}:
@@ -130,9 +133,9 @@ or accessed in kernels written with `KernelAbstractions.jl`, like for example th
 
 \begin{lstlisting}[language = Julia]
 @kernel function residual_kernel!(F, v_m, v_a,
-                                  ybus_re_nzval, ybus_re_colptr, ybus_re_rowval,
-                                  ybus_im_nzval, ybus_im_colptr, ybus_im_rowval,
-                                  pinj, qinj, pv, pq, nbus)
+                    re_nzval, re_colptr, re_rowval,
+                    im_nzval, im_colptr, im_rowval,
+                    pinj, qinj, pv, pq, nbus)
 
     npv = size(pv, 1)
     npq = size(pq, 1)
@@ -146,16 +149,18 @@ or accessed in kernels written with `KernelAbstractions.jl`, like for example th
     if i > npv
         F[i + npq] -= qinj[fr]
     end
-    @inbounds for c in ybus_re_colptr[fr]:ybus_re_colptr[fr+1]-1
-        to = ybus_re_rowval[c]
+    for c in re_colptr[fr]:re_colptr[fr+1]-1
+        to = re_rowval[c]
         aij = v_a[fr] - v_a[to]
-        coef_cos = v_m[fr]*v_m[to]*ybus_re_nzval[c]
-        coef_sin = v_m[fr]*v_m[to]*ybus_im_nzval[c]
+        coef_cos = v_m[fr]*v_m[to]*re_nzval[c]
+        coef_sin = v_m[fr]*v_m[to]*im_nzval[c]
         cos_val = cos(aij)
         sin_val = sin(aij)
-        F[i] += coef_cos * cos_val + coef_sin * sin_val
+        F[i] += coef_cos * cos_val 
+              + coef_sin * sin_val
         if i > npv
-            F[npq + i] += coef_cos * sin_val - coef_sin * cos_val
+            F[npq + i] += coef_cos * sin_val 
+                        - coef_sin * cos_val
         end
     end
 end
@@ -167,6 +172,7 @@ components of a tangent variable are the number of Jacobian colors. We
 illustrate this in \reffig{fig:simd} with a point-wise vector product \lstinline{x .* y}
 
 \begin{figure}
+    \centering
     \includegraphics[width=0.45\textwidth]{figures/simd.png}
     \caption{SIMD AD for point-wise vector product}
     \label{fig:simd}
@@ -210,6 +216,7 @@ problems.
 The Jacobian is partitioned into a dense block diagonal structure, where each block is inverted to build our preconditioner \lstinline{P}. For the partition we use \lstinline{Metis.jl}.
 
 \begin{figure}
+    \centering
     \includegraphics[width=0.25\textwidth]{figures/gpublocks.png}
     \caption{Dense block Jacobi preconditioner}
     \label{fig:preconditioner}
@@ -218,7 +225,8 @@ The Jacobian is partitioned into a dense block diagonal structure, where each bl
 Compared to incomplete Cholesky and incomplete LU this preconditioner is easily portable to the GPU if the number of blocks is high enough. \lstinline{ExaPF.jl} uses the batch BLAS calls from \lstinline{CUBLAS} to invert the single blocks.
 
 \begin{lstlisting}[language = Julia]
-CUDA.@sync pivot, info = CUDA.CUBLAS.getrf_batched!(blocks, true)
+CUDA.@sync pivot, info = 
+CUDA.CUBLAS.getrf_batched!(blocks, true)
 CUDA.@sync pivot, info, p.cuJs = CUDA.CUBLAS.getri_batched(blocks, pivot)
 \end{lstlisting}
 
@@ -234,6 +242,7 @@ LAPACK takes 0.22s to solve the system on the CPU, and CUSOLVER (with \lstinline
 takes 2.70s.
 
 \begin{figure}
+    \centering
     \includegraphics[width=0.45\textwidth]{figures/usecase.png}
     \caption{Use Case}
     \label{fig:usecase}
