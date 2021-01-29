@@ -1,21 +1,22 @@
-title: "My JuliaCon proceeding"
-keywords:
+title: 'ExaPF.jl: A Power Flow Solver for GPUs'
+tags:
   - Julia
-  - Optimization
-  - Game theory
-  - Compiler
+  - CUDA
+  - power flow
+  - iterative linear solver
+  - preconditioner
 authors:
-  - name: 1st author
-    orcid: 0000-0003-1361-440X
+  - name: Michel Schanen
+    orcid: 0000-0002-4164-027X
     affiliation: 1
-  - name: 2nd author
-    affiliation: 1, 2
-  - name: 3rd author
-    affiliation: 2
+  - name: Adrian Maldonado
+    affiliation: 1
+  - name: François Pacaud
+    affiliation: 1
+  - name: Mihai Anitescu
+    affiliation: 1
 affiliations:
-  - name: University
-    index: 1
-  - name: National Lab
-    index: 2
-date: 24 April 2019
-bibliography: ref.bib
+ - name: Argonne National Laboratory
+   index: 1
+date: 30 September 2020
+bibliography: paper.bib
