@@ -1,10 +1,11 @@
 title: 'ExaPF.jl: A Power Flow Solver for GPUs'
 keywords:
   - Julia
-  - CUDA
+  - GPU
   - power flow
   - iterative linear solver
   - preconditioner
+  - automatic differentiation
 authors:
   - name: Michel Schanen
     orcid: 0000-0002-4164-027X
